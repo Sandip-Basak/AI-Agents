@@ -3,7 +3,7 @@
 from pinecone import Pinecone
 from openai import OpenAI
 
-pc = Pinecone(api_key="pcsk_2udjR3_84j14qkp2bevesfCtYtSK6Ak157FbDFzgDhsswRmSUfhFPSesVMmdsjThN1MTbv")
+pc = Pinecone(api_key="API_KEY")
 
 # To get the unique host for an index, 
 # see https://docs.pinecone.io/guides/manage-data/target-an-index
@@ -20,7 +20,7 @@ else:
     print(f"Error: Index '{index_name}' does not exist. Please check the index name.")
 
 # OpenAI Embeddings
-openai_client = OpenAI(api_key="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")
+openai_client = OpenAI(api_key="API_KEY")
 # IMPORTANT: This must be the same model used when upserting data
 openai_embedding_model = "text-embedding-ada-002"
 

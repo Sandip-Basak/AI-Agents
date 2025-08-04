@@ -4,7 +4,7 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 import google.generativeai as genai
 
 
-pc = Pinecone(api_key="pcsk_2udjR3_84j14qkp2bevesfCtYtSK6Ak157FbDFzgDhsswRmSUfhFPSesVMmdsjThN1MTbv")
+pc = Pinecone(api_key="API_KEY")
 
 index_name = "my-rag-index"
 # Dimension will depend on your embedding model.
@@ -242,7 +242,7 @@ text_splitter = RecursiveCharacterTextSplitter(
 texts = text_splitter.split_text(raw_text)
 # print(f"Split {len(texts)} chunks.")
 
-genai.configure(api_key="AIzaSyCbpgCbukmgTg_PpY6ScFZtTfAv3k5fDGw")
+genai.configure(api_key="API_KEY")
 
 # Note: 'models/embedding-001' or 'models/text-embedding-004' are common.
 # Check current Gemini embedding model dimensions.

@@ -1,7 +1,7 @@
 from pinecone import Pinecone
 import google.generativeai as genai
 
-pc = Pinecone(api_key="pcsk_2udjR3_84j14qkp2bevesfCtYtSK6Ak157FbDFzgDhsswRmSUfhFPSesVMmdsjThN1MTbv")
+pc = Pinecone(api_key="API_KEY")
 
 # To get the unique host for an index, 
 # see https://docs.pinecone.io/guides/manage-data/target-an-index
@@ -10,7 +10,7 @@ pc = Pinecone(api_key="pcsk_2udjR3_84j14qkp2bevesfCtYtSK6Ak157FbDFzgDhsswRmSUfhF
 # index = pc.Index(host="https://my-rag-index-ks1v9lh.svc.aped-4627-b74a.pinecone.io")
 
 index_name = "my-rag-index" # Use the name of your pre-built index
-genai.configure(api_key="AIzaSyCbpgCbukmgTg_PpY6ScFZtTfAv3k5fDGw")
+genai.configure(api_key="API_KEY")
 
 # Note: 'models/embedding-001' or 'models/text-embedding-004' are common.
 # Check current Gemini embedding model dimensions.
