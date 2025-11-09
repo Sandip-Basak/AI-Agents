@@ -1,0 +1,169 @@
+{
+  "name": "MCP Server Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -440,
+        -40
+      ],
+      "id": "25f289b1-8055-4fc1-bbf2-0f657525baf4",
+      "name": "When chat message received",
+      "webhookId": "e52d6a21-63a7-4f30-88d8-e944b7b0e3ed"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        -220,
+        -40
+      ],
+      "id": "dbd19e0b-b3ce-440a-8b93-46033e9a6c86",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -280,
+        140
+      ],
+      "id": "7db114cb-aaa8-45f9-b57b-71ed3295ef2c",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "EL48oLxoDChr7qu2",
+          "name": "Google Gemini Credentials"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -160,
+        160
+      ],
+      "id": "5ba2dcdc-b822-42dc-b93d-5ef3a16ba33d",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-mcp.mcpClientTool",
+      "typeVersion": 1,
+      "position": [
+        20,
+        160
+      ],
+      "id": "0644b275-a8b4-417a-a746-8f0c5f804ef0",
+      "name": "Airbnb List Tools",
+      "credentials": {
+        "mcpClientApi": {
+          "id": "vSP2Ai59EIgGdZ5i",
+          "name": "MCP Client (STDIO) account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeTool",
+        "toolName": "={{ $fromAI(\"tool\", \"Selected tool to execute\") }}",
+        "toolParameters": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Tool_Parameters', ``, 'json') }}"
+      },
+      "type": "n8n-nodes-mcp.mcpClientTool",
+      "typeVersion": 1,
+      "position": [
+        160,
+        160
+      ],
+      "id": "9ba9d775-2f14-4113-b301-dc8946f1059b",
+      "name": "Airbnb Execute Tools",
+      "credentials": {
+        "mcpClientApi": {
+          "id": "vSP2Ai59EIgGdZ5i",
+          "name": "MCP Client (STDIO) account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Airbnb List Tools": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Airbnb Execute Tools": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "a0229bbb-465a-4ee4-a64f-7218a0f82e6b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "cd632418f55bf8d66c903947253191fed01f483c125dc06bb80018f4e63d251c"
+  },
+  "id": "M5uhkNa4v57ijFUo",
+  "tags": []
+}

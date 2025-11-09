@@ -1,0 +1,634 @@
+{
+  "name": "Email Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {},
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -608,
+        96
+      ],
+      "id": "9614bdfc-06fe-452f-9acf-e9240796d530",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "dzxKonv2c78IBlgm",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "text": "=Email Subject:  {{ $json.subject }}\n\nEmail Body:\n{{ $json.text }}",
+        "attributes": {
+          "attributes": [
+            {
+              "name": "requirement",
+              "type": "boolean",
+              "description": "=Analyze the following email text and classify it strictly as true of false:  \nTrue — if the email contains a project request, work brief, or task requirement.  \nFalse — if it’s general communication, feedback, or unrelated content.",
+              "required": true
+            },
+            {
+              "name": "job_type",
+              "description": "=From the email below, identify the type of work requested by the client.\nPossible types: Content, Copy/Campaign, Website, SEO, ADS, Other.\n\nOutput format:\nType of Work: <Content | Copy/Campaign | Website | SEO | ADS | Other>"
+            },
+            {
+              "name": "requirements",
+              "description": "From the following email, extract and summarize the client's main requirements or tasks in one clear and concise paragraph.\n\nOutput format:\nRequirements: <Requirements in bulleted points>"
+            },
+            {
+              "name": "client_name",
+              "description": "From the following email, extract the name of the client or the person who sent the email.\nIf not mentioned clearly, use the sender’s email address name part (before '@') as fallback."
+            },
+            {
+              "name": "priority",
+              "description": "Analyze the following email and classify the priority based on the tone and urgency.\n\nRules:\n- High: Mentions urgency, deadline, ASAP, or immediate action.\n- Medium: Mentions time expectations but not urgent.\n- Low: No urgency or flexible timelines.\n\nOutput format:\nPriority: <High | Medium | Low>\n"
+            },
+            {
+              "name": "company_name",
+              "description": "From the following email, extract the name of the company.|If not mentioned clearly, use the sender’s email address name part (before '@') as fallback."
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1.2,
+      "position": [
+        -384,
+        96
+      ],
+      "id": "7d25250e-6513-4d9c-b3bf-a9f97afbcef2",
+      "name": "Information Extractor",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -320,
+        320
+      ],
+      "id": "4f2762b1-4d56-4001-980f-a4df377c0923",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "flhjXYRi7UxwPvVk",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "ae694ef0-92eb-4fb5-864f-0081d53c76c4",
+              "leftValue": "={{ $json.output.requirement }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -32,
+        96
+      ],
+      "id": "f6782ee6-cc3c-4a66-a919-433b08d6f872",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.output.job_type }}",
+                    "rightValue": "Content",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "de427ee0-7171-450e-93e3-a40587287a66"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Content"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "aaaa6dab-3e4d-4a81-a0c5-2d67acb4da83",
+                    "leftValue": "={{ $json.output.job_type }}",
+                    "rightValue": "Copy/Campaign",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Campaign"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "16a80933-1975-43be-83ff-4b256e1d122a",
+                    "leftValue": "={{ $json.output.job_type }}",
+                    "rightValue": "Website",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Website"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "c0feb281-fc6f-49ee-a7aa-ba0c7b73e27e",
+                    "leftValue": "={{ $json.output.job_type }}",
+                    "rightValue": "SEO",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "SEO"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "bbc527b1-cdee-4632-91eb-9719f584cc12",
+                    "leftValue": "={{ $json.output.job_type }}",
+                    "rightValue": "ADS",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "ADS"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        192,
+        48
+      ],
+      "id": "8d600dbe-3e29-44aa-9ef6-60fcb52476f1",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ef264e48-01ae-4390-b1dc-cbe25159996c",
+              "name": "email",
+              "value": "sandipisbrave+content@gmail.com",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        416,
+        -288
+      ],
+      "id": "fe1e7268-d604-45e6-8572-74d4be9de892",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ef264e48-01ae-4390-b1dc-cbe25159996c",
+              "name": "email",
+              "value": "sandipisbrave+campaign@gmail.com",
+              "type": "string"
+            },
+            {
+              "id": "61614296-819a-49c2-a269-563caab2d6fe",
+              "name": "",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        416,
+        -96
+      ],
+      "id": "6c4da0f3-1ead-4b70-9f82-8204a597fea4",
+      "name": "Edit Fields2"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ef264e48-01ae-4390-b1dc-cbe25159996c",
+              "name": "email",
+              "value": "sandipisbrave+ads@gmail.com",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        416,
+        480
+      ],
+      "id": "96bb073f-1b4b-40e5-a515-f035934443a3",
+      "name": "Edit Fields3"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ef264e48-01ae-4390-b1dc-cbe25159996c",
+              "name": "email",
+              "value": "sandipisbrave+seo@gmail.com",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        416,
+        288
+      ],
+      "id": "8870c6c7-8294-45db-893a-4fd51d05e91f",
+      "name": "Edit Fields4"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "542a0323-2976-4054-add9-09d2b5064205",
+              "name": "email",
+              "value": "sandipisbrave+website@gmail.com",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        416,
+        96
+      ],
+      "id": "8bd12a7f-4e3e-4ade-8bc8-6e1d87eff45b",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        640,
+        96
+      ],
+      "id": "1fec7377-c386-4a07-8376-e5c5bf0285c1",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.email }}",
+        "subject": "={{ $json.output.job_type }} Requirement",
+        "emailType": "text",
+        "message": "=Client Name: {{ $json.output.client_name }}\nCompany: {{ $json.output.company_name }}\n\nRequirements:\n{{ $json.output.requirements }}\n\nPriority:\n{{ $json.output.priority }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        864,
+        0
+      ],
+      "id": "63ce74e4-b841-4c3f-b448-0cabb9843b30",
+      "name": "Send a message",
+      "webhookId": "2c8175ce-cb51-45c6-b725-0035e1656af9",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "dzxKonv2c78IBlgm",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Gmail Trigger').item.json.from.value[0].address }}",
+        "subject": "= {{ $json.output.company_name }}{{ $('Gmail Trigger').item.json.subject }}",
+        "emailType": "text",
+        "message": "=Hey, {{ $json.output.client_name.split(\" \")[0] }} we got your requirements. Someone from our team will get into it soon!",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        864,
+        192
+      ],
+      "id": "6f638f50-34c4-4cf7-85c9-ba876b72fef2",
+      "name": "Send a message1",
+      "webhookId": "95d445e8-7247-4574-a2e4-711832bf7720",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "dzxKonv2c78IBlgm",
+          "name": "Gmail account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Information Extractor": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields4",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields4": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields3": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "f10cbaf3-4057-4c6a-8c5e-70b7c6c40ef8",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "676d742c3b6c573e889387bbffeeba78c70082cdfd0e5517ca6335302a1a0314"
+  },
+  "id": "8kHBOxKvOi3DGKOA",
+  "tags": []
+}

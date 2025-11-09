@@ -1,0 +1,319 @@
+{
+  "name": "Image Generation from Image",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Video Genration",
+        "formDescription": "Add the following details to generate your own product video",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Product Image",
+              "fieldType": "file",
+              "multipleFiles": false,
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Product Title",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Product Description",
+              "fieldType": "textarea",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Your Email",
+              "fieldType": "email",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "ef9d916a-369f-40ea-9a42-70249dbbe3b4",
+      "name": "On form submission",
+      "webhookId": "d7855c1e-864a-4fe1-bb68-28002569fbbd"
+    },
+    {
+      "parameters": {
+        "inputDataFieldName": "Product_Image",
+        "name": "={{ $json['Product Title'] }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "11otM4sD6Xl85NvD2AKmaDBuDp_t9rxDl",
+          "mode": "list",
+          "cachedResultName": "AI Automations n8n",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/11otM4sD6Xl85NvD2AKmaDBuDp_t9rxDl"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        160,
+        0
+      ],
+      "id": "4172a727-2741-4789-afad-de4bfdeedb81",
+      "name": "Upload file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "veVcjlEaEaNDWXlb",
+          "name": "sandipisbrave"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Product: {{ $('On form submission').item.json['Product Title'] }}\nDescription: {{ $('On form submission').item.json['Product Description'] }}",
+        "options": {
+          "systemMessage": "=# Overview\nYou are a world-class marketing strategist and an expert text-to-image prompt engineer specializing in creating hyper-realistic, high-quality product photography prompts for AI image generation models.\n\n## Your Objective:\nWhen given a product description, your task is to craft a detailed, professional prompt that results in a hyper-realistic, clean, and visually stunning product image suitable for marketing material, advertising campaigns, or e-commerce platforms.\n\n## Key Requirements:\n- Focus on hyper-realistic, professional studio photography.\n- Maintain a clean, minimalistic, and elegant visual style.\n- Highlight the product as the main subject with sharp detail and perfect lighting.\n- Use backgrounds that complement but do not overpower the product (e.g., soft gradient, light-colored, or pure white).\n- Include professional lighting details such as \"softbox lighting\", \"studio lights\", or \"natural soft shadows\".\n- Emphasize realism, texture, and color accuracy.\n- Maintain a high-end, premium look and feel.\n- If applicable, suggest a subtle setting that enhances the product's story (e.g., a luxury kitchen counter for a high-end blender).\n\n## Output Format:\n- Write a single text-to-image prompt optimized for a professional AI image model.\n- Be direct and descriptive without using excessive words.\n- Avoid unnecessary repetition or adjectives that do not enhance the image quality.\n- Ensure the prompt is complete and ready for direct input into an AI model.\n\n## Tone:\nProfessional, precise, clean, and optimized for maximum realism and marketing impact.\n\n# Example Input:\n\"A premium wireless Bluetooth speaker in matte black, cylindrical shape, modern design.\"\n\n# Example Output:\n\"Hyper-realistic product photo of a premium matte black wireless Bluetooth speaker with a cylindrical modern design, centered on a clean white studio background, softbox lighting with natural shadows, sharp focus on texture and material, minimalistic, professional advertising shot.\""
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        300,
+        0
+      ],
+      "id": "0caaf977-a915-4f51-b107-6387aeb95619",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        300,
+        160
+      ],
+      "id": "bee28ef0-355e-456b-b780-423defed4d60",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "R6lnHfoKIAe3w9zP",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $('Upload file').item.json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        580,
+        0
+      ],
+      "id": "c17d6912-be03-493a-85c0-904348e940be",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "veVcjlEaEaNDWXlb",
+          "name": "sandipisbrave"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/images/edits",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "image",
+              "inputDataFieldName": "data"
+            },
+            {
+              "name": "model",
+              "value": "gpt-image-1"
+            },
+            {
+              "name": "prompt",
+              "value": "={{ $('AI Agent').item.json.output }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        720,
+        0
+      ],
+      "id": "86c2c54c-026d-4c47-a992-c3a800a74af5",
+      "name": "HTTP Request",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "j3BG5dKOoIDEZu5u",
+          "name": "OpenAI Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "data[0].b64_json",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        860,
+        0
+      ],
+      "id": "8b945579-1229-4a75-9e33-8c2f6bcb306f",
+      "name": "Convert to File"
+    },
+    {
+      "parameters": {
+        "name": "={{ $('On form submission').item.json['Product Title'] }} (Generated Image)",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "11otM4sD6Xl85NvD2AKmaDBuDp_t9rxDl",
+          "mode": "list",
+          "cachedResultName": "AI Automations n8n",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/11otM4sD6Xl85NvD2AKmaDBuDp_t9rxDl"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1000,
+        0
+      ],
+      "id": "a1140b12-b31c-4794-b6f4-33808d33e191",
+      "name": "Upload file1",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "veVcjlEaEaNDWXlb",
+          "name": "sandipisbrave"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Upload file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload file": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "Upload file1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "96b697d4-869a-4790-bc18-92393167434e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e2da5d03ffa9f1a0ba09aa5aa537602469bd41b043be7dc3fe2777bce661b560"
+  },
+  "id": "fP2Va2QFocQQh6nI",
+  "tags": []
+}
